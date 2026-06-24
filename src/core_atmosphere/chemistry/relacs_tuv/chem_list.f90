@@ -1,4 +1,4 @@
-MODULE chem1_list
+MODULE chem_list
   IMPLICIT NONE
   
   
@@ -840,4 +840,4 @@ MODULE chem1_list
                                                "Glyxlb ","NONE   ","NONE   ","NONE   ","NONE   "/),(/maxJcomb,nr_photo/))
 
   
-END MODULE chem1_list
+END MODULE chem_list

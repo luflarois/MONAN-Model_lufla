@@ -1,7 +1,7 @@
 module mod_chem_spack_rodas3_dyndt
 
-    use modFile, only: &
-    chem1_vars        ! Type
+    use modMemoryChem, only: &
+    chem_vars        ! Type
 
     use mem_spack, only: &
     spack_type, & ! Type
@@ -49,7 +49,7 @@ contains
       , n_dyn_chem &
       , split_method &
       , jphoto &
-      , chem1_g &
+      , chem_g &
       , nspecies_chem_transported &
       , nspecies_chem_no_transported &
       , transp_chem_index &
@@ -78,7 +78,7 @@ contains
         character(len = 20), intent(in) :: split_method
         real,                intent(in) :: jphoto(:,:,:)
         !
-        type(chem1_vars),    intent(inout) :: chem1_g(:)
+        type(chem_vars),     intent(inout) :: chem_g(:)
         real,                intent(inout) :: last_accepted_dt(:)
 
         interface
@@ -236,7 +236,7 @@ contains
                     n = no_transp_chem_index(ispc)
                     !- initialize no-transported species (don't need to convert, because these
                     !- species are already saved using molecule/cm^3 units)
-                    spack(inob)%sc_p(ijk, n) = chem1_g(n)%sc_p(ijk, i)
+                    spack(inob)%sc_p(ijk, n) = chem_g(n)%sc_p(ijk, i)
                 end do
 
             end do
@@ -250,8 +250,8 @@ contains
                         !- map the species to transported ones
                         n = transp_chem_index(ispc)
 
-                        spack(inob)%sc_p(ijk, n) = (chem1_g(n)%sc_p(ijk, i) - &  ! updated mixing ratio
-                        chem1_g(n)%sc_t_dyn(ijk,i) * n_dyn_chem * dtlt)&  ! accumulated tendency
+                        spack(inob)%sc_p(ijk, n) = (chem_g(n)%sc_p(ijk, i) - &  ! updated mixing ratio
+                        chem_g(n)%sc_t_dyn(ijk,i) * n_dyn_chem * dtlt)&  ! accumulated tendency
                         * spack(inob)%volmol(ijk) / weight(n)
 
                     end do
@@ -265,7 +265,7 @@ contains
                         n = transp_chem_index(ispc)
 
                         !- conversion from ppbm to molecule/cm^3
-                        spack(inob)%sc_p(ijk, n) = chem1_g(n)%sc_p(ijk, i) * spack(inob)%volmol(ijk) / weight(n)
+                        spack(inob)%sc_p(ijk, n) = chem_g(n)%sc_p(ijk, i) * spack(inob)%volmol(ijk) / weight(n)
                         spack(inob)%sc_p(ijk, n) = max(0.d0, spack(inob)%sc_p(ijk, n))
                     end do
 
@@ -635,9 +635,9 @@ contains
                         n = transp_chem_index(ispc)
 
                         !- include the chemical tendency at total tendency (convert to unit: ppbm/s)
-                        chem1_g(n)%sc_p(ijk, i) = chem1_g(n)%sc_t_dyn(ijk,i) * n_dyn_chem * dtlt + &
+                        chem_g(n)%sc_p(ijk, i) = chem_g(n)%sc_t_dyn(ijk,i) * n_dyn_chem * dtlt + &
                         spack(inob)%sc_p(ijk, n) * weight(n) * spack(inob)%volmol_i(ijk)
-                        chem1_g(n)%sc_p(ijk, i) = max(0., chem1_g(n)%sc_p(ijk, i))
+                        chem_g(n)%sc_p(ijk, i) = max(0., chem_g(n)%sc_p(ijk, i))
 
                     end do
                 enddo
@@ -653,10 +653,10 @@ contains
                         n = transp_chem_index(ispc)
 
                         !- include the chemical tendency at total tendency (convert to unit: ppbm/s)
-                        !           chem1_g(n)%sc_t(kij_) =          +  &! use this for update only chemistry (No dyn/emissions
-                        chem1_g(n)%sc_t(ijk,i) = chem1_g(n)%sc_t(ijk,i) + &! previous tendency
+                        !           chem_g(n)%sc_t(kij_) =          +  &! use this for update only chemistry (No dyn/emissions
+                        chem_g(n)%sc_t(ijk,i) = chem_g(n)%sc_t(ijk,i) + &! previous tendency
                         (spack(inob)%sc_p(ijk, n) * weight(n) * spack(inob)%volmol_i(ijk) - &! new mixing ratio
-                        chem1_g(n)%sc_p(ijk, i)) &! old mixing ratio
+                        chem_g(n)%sc_p(ijk, i)) &! old mixing ratio
                          * dble_dtlt_i                     ! inverse of timestep
                     end do
                 end do
@@ -670,8 +670,8 @@ contains
                         !- map the species to transported ones
                         n = transp_chem_index(ispc)
 
-                        chem1_g(n)%sc_p(ijk, i) = spack(inob)%sc_p(ijk, n) * weight(n) * spack(inob)%volmol_i(ijk)
-                        chem1_g(n)%sc_p(ijk, i) = max(0., chem1_g(n)%sc_p(ijk, i))
+                        chem_g(n)%sc_p(ijk, i) = spack(inob)%sc_p(ijk, n) * weight(n) * spack(inob)%volmol_i(ijk)
+                        chem_g(n)%sc_p(ijk, i) = max(0., chem_g(n)%sc_p(ijk, i))
                     end do
                 end do
 
@@ -687,8 +687,8 @@ contains
                     n = no_transp_chem_index(ispc)
 
                     !- save no-transported species (keep current unit : molec/cm3)
-                    !LFR-MONAN chem1_g(n)%sc_p(k_, i_, j_) = max(0., real (spack(inob)%sc_p(ijk, n)))
-                    chem1_g(n)%sc_p(ijk, i) = max(0., real (spack(inob)%sc_p(ijk, n)))
+                    !LFR-MONAN chem_g(n)%sc_p(k_, i_, j_) = max(0., real (spack(inob)%sc_p(ijk, n)))
+                    chem_g(n)%sc_p(ijk, i) = max(0., real (spack(inob)%sc_p(ijk, n)))
                 end do
 
             end do

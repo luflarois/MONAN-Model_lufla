@@ -1,11 +1,6 @@
 module mem_spack
 
-    ! use spack_utils,only: nob_real=>nob,maxblock_size
-
-    !lfr-monan use spack_utils,only: &
-    !lfr-monan      maxblock_size      ! in
-
-    use chem1_list, only: &
+    use chem_list, only: &
     nspecies, & ! parameter
     nr, & ! parameter
     nr_photo, & ! parameter

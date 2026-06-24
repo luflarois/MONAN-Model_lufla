@@ -2,7 +2,7 @@
 
 all: relacs_tuv  
 
-OBJS =  chem1_list.o \
+OBJS =  chem_list.o \
 		chem_spack_dratedc.o \
 		chem_spack_fexchem.o \
 		chem_spack_fexloss.o \
