@@ -21,6 +21,8 @@ module modMemoryChem
     integer :: nspecies_chem_no_transported
     integer :: transp_chem_index(nSpecies)
     integer :: no_transp_chem_index(nSpecies)
+    integer :: n_dyn_chem
+    real    :: chem_timestep 
 
 contains
 

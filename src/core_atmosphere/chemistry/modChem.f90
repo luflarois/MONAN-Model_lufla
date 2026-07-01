@@ -8,7 +8,7 @@ module modChem
   use mpas_timekeeping, only: mpas_get_time, mpas_get_clock_time
   use chem1_list, only: nspecies, weight, spc_name, nr_photo
   use modRodas3_dynt, only: Rodas3_dynt, test_rodas3_dynt
-  use modChemMemory, only: allocate_chem_species &
+  use modMemoryChem, only: allocate_chem_species &
       , n_dyn_chem &
       , chem_timestep
   use modFilesChem, only: read_Cams_Chem, mass_frac_to_molec_cm3, read_static_test, readBramsOut
@@ -181,27 +181,48 @@ write(ctime,fmt='(I2.2)') iTimestep
 !end do
 !close(unit=22)
 
-                call Rodas3_dynt(                &
-                 press         = pres_hyd_p      &
-                ,temp          = t_p             &
-                ,rho           = rho_p           &
-                ,pp            = pres_p          &
-                ,coszr         = coszr_p         &
-                ,glat          = xlat_p          &
-                ,glon          = xlon_p          &
-                ,qv            = qv_p            &
-                ,qc            = qc_p            &
-                ,chem_conc     = chem_conc_p     &
-                ,chem_tend     = chem_tend_p     &
-                ,chem_tend_dyn = chem_tend_dyn_p &
-                ,jphoto        = jphoto          &
-                ,dtlt          = config_dt       &
-                ,itimestep     = iTimestep       &
-                ,nCells        = nCells          &
-                ,nVertLevels   = nVertLevels     &
-                ,timestamp     = timeStamp       &
-                ,mynum         = mynum           &
-                )
+                ! call Rodas3_dynt(                &
+                !  press         = pres_hyd_p      &
+                ! ,temp          = t_p             &
+                ! ,rho           = rho_p           &
+                ! ,pp            = pres_p          &
+                ! ,coszr         = coszr_p         &
+                ! ,glat          = xlat_p          &
+                ! ,glon          = xlon_p          &
+                ! ,qv            = qv_p            &
+                ! ,qc            = qc_p            &
+                ! ,chem_conc     = chem_conc_p     &
+                ! ,chem_tend     = chem_tend_p     &
+                ! ,chem_tend_dyn = chem_tend_dyn_p &
+                ! ,jphoto        = jphoto          &
+                ! ,dtlt          = config_dt       &
+                ! ,itimestep     = iTimestep       &
+                ! ,nCells        = nCells          &
+                ! ,nVertLevels   = nVertLevels     &
+                ! ,timestamp     = timeStamp       &
+                ! ,mynum         = mynum           &
+                ! )
+
+
+                call chem_rodas3_dyndt( &
+                    nob = nCells &
+                  , block_end = nVertLevels &
+                  , dtlt = config_dt &
+                  , press = pres_hyd_p &
+                  , temp = t_p &
+                  , vapp = qv_p&
+                  , last_accepted_dt  = last_accepted_dt &
+                  , n_dyn_chem = n_dyn_chem &
+                  , split_method = split_method &
+                  , jphoto = jphoto
+                  , chem1_g = chem1_g
+                  , nspecies_chem_transported = nspecies_chem_transported
+                  , nspecies_chem_no_transported = nspecies_chem_no_transported
+                  , transp_chem_index = transp_chem_index
+                  , no_transp_chem_index = no_transp_chem_index
+                  , chemistry = chemistry
+                  , maxblock_size = maxblock_size
+                  )
 
                 call chemistry_to_MPAS(block%configs,diag,nChemSpecies,nVertLevels,nCells)
 

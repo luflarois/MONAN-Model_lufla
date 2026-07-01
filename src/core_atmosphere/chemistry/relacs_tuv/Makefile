@@ -19,7 +19,7 @@ relacs_tuv: $(OBJS)
 
 # Regra para compilar .f90 em .o
 .f90.o:
-	$(FC) $(FFLAGS) -c $< $(FCINCLUDES) -I.. -I../../framework -I../../external/esmf_time_f90 -I ./tuv -I../physics
+	$(FC) $(FFLAGS) -c $< $(FCINCLUDES) -I.. 
 
 clean:
 	$(RM) *.o *.mod *.i
